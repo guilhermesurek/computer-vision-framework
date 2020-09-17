@@ -27,6 +27,10 @@ class Options():
         parser.add_argument('--verbose',
                             action='store_true',
                             help='If you want to see prints of what is happening in the code.')
+        parser.add_argument('--cuda',
+                            default=True,
+                            type=bool,
+                            help='If you want to use cuda, if available.')
         ### OPTIONS SECTION
         parser.add_argument('--opts_src_path',
                             default=None,
@@ -40,6 +44,31 @@ class Options():
         parser.add_argument('--webcam',
                             action='store_true',
                             help='Run scripts with webcam.')
+        ### OBJECT DETECTIION SECTION
+        parser.add_argument('--od_model',
+                            default='Yolov4',
+                            type=str,
+                            help="Model type of Object Detection Algorithm. For now only support 'Yolov4'.")
+        parser.add_argument('--od_n_classes',
+                            default=80,
+                            type=int,
+                            help="Number of classes of the Object Detection Algorithm. Default 80 (Coco).")
+        parser.add_argument('--od_in_h',
+                            default=416,
+                            type=int,
+                            help="Input height for the Object Detection Model.")
+        parser.add_argument('--od_in_w',
+                            default=416,
+                            type=int,
+                            help="Input width for the Object Detection Model.")
+        parser.add_argument('--od_weights_path',
+                            default=None,
+                            type=Path,
+                            help='Object Detection model pretrained weights file path.')
+        parser.add_argument('--od_class_names_path',
+                            default=Path('models/obj_det/coco.names'),
+                            type=Path,
+                            help='Object Detection model class names file path, if your pretrained weights use different class names.')                
 
         # Apply parser to the inputed arguments
         args = parser.parse_args()
@@ -84,6 +113,12 @@ class Options():
         if opt.opts_src_path is not None:
             if not os.path.isabs(opt.opts_src_path):
                 opt.opts_src_path = opt.root_path / opt.opts_src_path
+        if opt.od_weights_path is not None:
+            if not os.path.isabs(opt.od_weights_path):
+                opt.od_weights_path = opt.root_path / opt.od_weights_path
+        if opt.od_class_names_path is not None:
+            if not os.path.isabs(opt.od_class_names_path):
+                opt.od_class_names_path = opt.root_path / opt.od_class_names_path
         
         # return result opts
         return opt
