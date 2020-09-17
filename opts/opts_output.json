@@ -1,1 +1,1 @@
-{"root_path": "D:\\Mestrado\\computer-vision-framework", "opts_src_path": "D:\\Mestrado\\computer-vision-framework\\opts\\opts_input.json", "opts_dst_path": "D:\\Mestrado\\computer-vision-framework\\opts\\opts_output.json", "model": "resnet"}
+{"root_path": "D:\\Mestrado\\computer-vision-framework", "verbose": false, "opts_src_path": null, "opts_dst_path": "D:\\Mestrado\\computer-vision-framework\\opts\\opts_output.json", "webcam": true}

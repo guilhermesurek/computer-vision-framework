@@ -1,4 +1,6 @@
+# main.py
 from opts.opts import Options
+from webcam import main_cam
 
 def pretty_print(title, msg, size=24):
     ''' Make print prettier. '''
@@ -13,3 +15,7 @@ if __name__ == "__main__":
 
     # Print loaded options
     pretty_print("OPTIONS", opt)
+
+    # Run models in webcam
+    if opt.webcam:
+        main_cam(opt)

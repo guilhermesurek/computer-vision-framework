@@ -24,6 +24,9 @@ class Options():
                             default=None,
                             type=Path,
                             help='Root directory path.')
+        parser.add_argument('--verbose',
+                            action='store_true',
+                            help='If you want to see prints of what is happening in the code.')
         ### OPTIONS SECTION
         parser.add_argument('--opts_src_path',
                             default=None,
@@ -33,7 +36,10 @@ class Options():
                             default=None,
                             type=Path,
                             help='Opts output file path. If not informed and opts_output.json in the folder opts we be created.')
-        
+        ### WEBCAM SECTION
+        parser.add_argument('--webcam',
+                            action='store_true',
+                            help='Run scripts with webcam.')
 
         # Apply parser to the inputed arguments
         args = parser.parse_args()
