@@ -26,15 +26,15 @@ This project was mainly based on:
     ```
     myenv/scripts/activate
     ```
-3. Install python required libraries
+4. Install python required libraries
     ```
     python pip install -r requirements.txt
     ```
-4. Install pytorch (pip installation is failing yet)
+5. Install pytorch (pip installation is failing yet)
     ```
     python pip install torch===1.6.0 torchvision===0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
     ```
-5. Download models weights for demo
+6. Download models weights for demo
     - [Yolov4 - Object Detection](https://drive.google.com/open?id=1wv_LiFeCRYwtpkqREPeI13-gPELBDwuJ)
         * Save in /models/obj_det
 
