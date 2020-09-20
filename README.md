@@ -34,7 +34,7 @@ This project was mainly based on:
     ```
     python pip install torch===1.6.0 torchvision===0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
     ```
-6. Download models weights for demo
+6. Download model's weights for demo
     - [Yolov4 - Object Detection](https://drive.google.com/open?id=1wv_LiFeCRYwtpkqREPeI13-gPELBDwuJ)
         * Save in /models/obj_det
 
