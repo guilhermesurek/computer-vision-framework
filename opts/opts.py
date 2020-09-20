@@ -45,6 +45,9 @@ class Options():
                             action='store_true',
                             help='Run scripts with webcam.')
         ### OBJECT DETECTIION SECTION
+        parser.add_argument('--od',
+                            action='store_true',
+                            help="Evaluate the Object Detection Algorithm.")
         parser.add_argument('--od_model',
                             default='Yolov4',
                             type=str,
@@ -62,13 +65,21 @@ class Options():
                             type=int,
                             help="Input width for the Object Detection Model.")
         parser.add_argument('--od_weights_path',
-                            default=None,
+                            default=Path('models/obj_det/yolov4.pth'),
                             type=Path,
                             help='Object Detection model pretrained weights file path.')
         parser.add_argument('--od_class_names_path',
                             default=Path('models/obj_det/coco.names'),
                             type=Path,
                             help='Object Detection model class names file path, if your pretrained weights use different class names.')                
+        parser.add_argument('--od_conf_threshold',
+                            default=0.4,
+                            type=float,
+                            help="Object Detection Model Confidence to filter outputs.")
+        parser.add_argument('--od_nms_threshold',
+                            default=0.6,
+                            type=float,
+                            help="Object Detection Model NSM Threshold.")
 
         # Apply parser to the inputed arguments
         args = parser.parse_args()

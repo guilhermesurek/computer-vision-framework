@@ -16,6 +16,24 @@ This project was mainly based on:
 
 # Use Mode
 
+## Setting Environment
+1. Clone repository
+2. Create your own virtual environment
+    ```
+    python -m venv myenv
+    ```
+3. Install python required libraries
+    ```
+    python pip install -r requirements.txt
+    ```
+4. Install pytorch (pip installation is failing yet)
+    ```
+    python pip install torch===1.6.0 torchvision===0.7.0 -f https://download.pytorch.org/whl/torch_stable.html
+    ```
+5. Download models weights for demo
+    - [Yolov4 - Object Detection](https://drive.google.com/open?id=1wv_LiFeCRYwtpkqREPeI13-gPELBDwuJ)
+        * Save in /models/obj_det
+
 ## Seting Options
 There are two ways to set your options to run the code.
 1. Passing it in command line.
@@ -26,6 +44,18 @@ There are two ways to set your options to run the code.
     ```
     python main.py --opts_src_path opts/opts_input.json
     ```
+
+## Testing Webcam
+Use the code below to test your webcam read.
+```
+python main.py --webcam
+```
+
+## Demo Object Detection with Webcam
+Use the code below to demo the OD algorithm with your webcam read.
+```
+python main.py --webcam --od
+```
 
 # Main Contributors
 - Guilherme Augusto Silva Surek

@@ -2,6 +2,9 @@
 from object_detection.od_model import Yolov4
 import time
 import numpy as np
+import torch
+import cv2
+import math
 
 class ObjectDetectionError(Exception):
     pass
@@ -15,8 +18,10 @@ class ObjDet():
         self.width = opt.od_in_w
         self.n_classes = opt.od_n_classes
         self.weights_path = opt.od_weights_path
-        self.class_names = self.get_class_names(opt)
-        self.model = self.get_model(opt)
+        self.conf_thresh = opt.od_conf_threshold
+        self.nms_thresh = opt.od_nms_threshold
+        self.class_names = self.get_class_names()
+        self.model = self.get_model()
     
     def get_model(self):
         # Verify model option
@@ -48,10 +53,13 @@ class ObjDet():
         # return class names
         return class_names
 
-    def do_detect(self, img, conf_thresh, nms_thresh):
+    def do_detect(self, img, conf_thresh=None, nms_thresh=None):
+        # Set model to eval mode
         self.model.eval()
+        # Start counting time
         t0 = time.time()
 
+        # Transform image based on shape
         if type(img) == np.ndarray and len(img.shape) == 3:  # cv2 image
             img = torch.from_numpy(img.transpose(2, 0, 1)).float().div(255.0).unsqueeze(0)
         elif type(img) == np.ndarray and len(img.shape) == 4:
@@ -59,27 +67,39 @@ class ObjDet():
         else:
             raise ObjectDetectionError("Unknow image type.")
 
+        # If cuda available, load image to cuda
         if self.opt.cuda:
             if torch.cuda.device_count() > 0 and torch.cuda.is_available():
                 img = img.cuda()
+        # Make torch transformations
         img = torch.autograd.Variable(img)
-        
+        # Save preprocessed time
         t1 = time.time()
-
+        # Run model
         output = self.model(img)
-
+        # Save model inference time
         t2 = time.time()
-
+        # If verbose, print information
         if self.opt.verbose:
             print('-----------------------------------')
             print('       OBJECT DETECTION MODEL      ')
             print('           Preprocess : %f' % (t1 - t0))
             print('      Model Inference : %f' % (t2 - t1))
             print('-----------------------------------')
-
-        return post_processing(img, conf_thresh, nms_thresh, output, verbose=self.opt.verbose)
+        # Check parameters
+        if conf_thresh == None:
+            conf_thresh = self.conf_thresh
+        if nms_thresh == None:
+            nms_thresh = self.nms_thresh
+        # Get Boxes
+        self.boxes = post_processing(img, conf_thresh, nms_thresh, output, verbose=self.opt.verbose)
+        return self.boxes
     
-    def plot_boxes_cv2(self, img, boxes, savename=None, class_names=None, color=None):
+    def plot_boxes_cv2(self, img, boxes=None, savename=None, class_names=None, color=None):
+        if boxes == None:
+            boxes = self.boxes[0]
+        if class_names == None:
+            class_names = self.class_names
         img = np.copy(img)
         colors = np.array([[1, 0, 1], [0, 0, 1], [0, 1, 1], [0, 1, 0], [1, 1, 0], [1, 0, 0]], dtype=np.float32)
 
@@ -107,7 +127,7 @@ class ObjDet():
             if len(box) >= 7 and class_names:
                 cls_conf = box[5]
                 cls_id = box[6]
-                print('%s: %f' % (class_names[cls_id], cls_conf))
+                #print('%s: %f' % (class_names[cls_id], cls_conf))
                 classes = len(class_names)
                 offset = cls_id * 123457 % classes
                 red = get_color(2, offset, classes)
@@ -117,8 +137,8 @@ class ObjDet():
                     rgb = (red, green, blue)
                 img = cv2.putText(img, class_names[cls_id], (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 1.2, rgb, 1)
                 # Distance
-                dist=47*484.04/(abs(x1-x2))
-                print(f"distance: {dist:0.3f}")
+                #dist=47*484.04/(abs(x1-x2))
+                #print(f"distance: {dist:0.3f}")
             img = cv2.rectangle(img, (x1, y1), (x2, y2), rgb, 1)
         if savename:
             print("save plot results to %s" % savename)
@@ -208,6 +228,7 @@ def post_processing(img, conf_thresh, nms_thresh, output, verbose=True):
             ll_max_conf = l_max_conf[cls_argwhere]
             ll_max_id = l_max_id[cls_argwhere]
 
+            # Check same class box overlap
             keep = nms_cpu(ll_box_array, ll_max_conf, nms_thresh)
             
             if (keep.size > 0):
