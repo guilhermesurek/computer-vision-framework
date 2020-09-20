@@ -18,9 +18,13 @@ This project was mainly based on:
 
 ## Setting Environment
 1. Clone repository
-2. Create your own virtual environment
+2. Create your own virtual environment (Optional but highly recommended)
     ```
     python -m venv myenv
+    ```
+3. Activate your new environment (Optional but highly recommended)
+    ```
+    myenv/scripts/activate
     ```
 3. Install python required libraries
     ```
