@@ -27,3 +27,7 @@ There are two ways to set your options to run the code.
     python main.py --opts_src_path opts/opts_input.json
     ```
 
+# Main Contributors
+- Guilherme Augusto Silva Surek
+- Mateus Isaac Di Domenico
+- Matheus Henrique Reis Marchioro
