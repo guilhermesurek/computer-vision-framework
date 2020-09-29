@@ -1,0 +1,42 @@
+{
+    "PT":{
+        "0": "Nariz",
+        "1": "Peito",
+        "2": "Ombro Direito",
+        "3": "Cotovelo Direito",
+        "4": "Mao Direita",
+        "5": "Ombro Esquerdo",
+        "6": "Cotovelo Esquerdo",
+        "7": "Mao Esquerda",
+        "8": "Quadril Direito",
+        "9": "Joelho Direito",
+        "10": "Pe Direito",
+        "11": "Quadril Esquerdo",
+        "12": "Joelho Esquerdo",
+        "13": "Pe Esquerdo",
+        "14": "Olho Direito",
+        "15": "Olho Esquerdo",
+        "16": "Ouvido Direito",
+        "17": "Ouvido Esquerdo"
+    },
+    "EN":{
+        "0": "Nose",
+        "1": "Chest",
+        "2": "Right Shoulder",
+        "3": "Right Elbow",
+        "4": "Right Hand",
+        "5": "Left Shoulder",
+        "6": "Left Elbow",
+        "7": "Left Hand",
+        "8": "Right Hip",
+        "9": "Right Knee",
+        "10": "Right Foot",
+        "11": "Left Hip",
+        "12": "Left Knee",
+        "13": "Left Foot",
+        "14": "Right Eye",
+        "15": "Left Eye",
+        "16": "Right Ear",
+        "17": "Left Ear"
+    }
+}

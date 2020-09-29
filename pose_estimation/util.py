@@ -70,8 +70,6 @@ def draw_bodypose(canvas, candidate, subset):
             polygon = cv2.ellipse2Poly((int(mY), int(mX)), (int(length / 2), stickwidth), int(angle), 0, 360, 1)
             cv2.fillConvexPoly(cur_canvas, polygon, colors[i])
             canvas = cv2.addWeighted(canvas, 0.4, cur_canvas, 0.6, 0)
-    # plt.imsave("preview.jpg", canvas[:, :, [2, 1, 0]])
-    # plt.imshow(canvas[:, :, [2, 1, 0]])
     return canvas
 
 def draw_handpose(canvas, all_hand_peaks, show_number=False):
@@ -90,7 +88,7 @@ def draw_handpose(canvas, all_hand_peaks, show_number=False):
 
     for peaks in all_hand_peaks:
         for ie, e in enumerate(edges):
-next            if np.sum(np.all(peaks[e], axis=1)==0)==0:
+            if np.sum(np.all(peaks[e], axis=1)==0)==0:
                 x1, y1 = peaks[e[0]]
                 x2, y2 = peaks[e[1]]
                 ax.plot([x1, x2], [y1, y2], color=matplotlib.colors.hsv_to_rgb([ie/float(len(edges)), 1.0, 1.0]))

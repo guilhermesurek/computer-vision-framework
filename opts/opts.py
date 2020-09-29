@@ -31,6 +31,10 @@ class Options():
                             default=True,
                             type=bool,
                             help='If you want to use cuda, if available.')
+        parser.add_argument('--lang',
+                            default="PT",
+                            type=str,
+                            help='Languagem of prints and labels, if available.')
         ### OPTIONS SECTION
         parser.add_argument('--opts_src_path',
                             default=None,
@@ -104,6 +108,10 @@ class Options():
                             default=Path('models/pose/body_pose_model.pth'),
                             type=Path,
                             help="Pose Estimation's Body Model pretrained weights file path.")
+        parser.add_argument('--pe_body_keys_path',
+                            default=Path('models/pose/body_key_points.json'),
+                            type=Path,
+                            help="Pose Estimation's Body keys meaning file path (json).")
         parser.add_argument('--pe_hand_model_path',
                             default=Path('models/pose/hand_pose_model.pth'),
                             type=Path,
