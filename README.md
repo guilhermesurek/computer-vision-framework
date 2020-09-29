@@ -37,6 +37,10 @@ This project was mainly based on:
 6. Download model's weights for demo
     - [Yolov4 - Object Detection](https://drive.google.com/open?id=1wv_LiFeCRYwtpkqREPeI13-gPELBDwuJ)
         * Save in /models/obj_det
+    - [Body - Pose Estimation](https://www.dropbox.com/sh/7xbup2qsn7vvjxo/AABaYNMvvNVFRWqyDXl7KQUxa/body_pose_model.pth?dl=0)
+        * Save in /models/pose
+    - [Hand - Pose Estimation](https://www.dropbox.com/sh/7xbup2qsn7vvjxo/AAApu9PiOpzGYEUqzIzsxqbFa/hand_pose_model.pth?dl=0)
+        * Save in /models/pose
 
 ## Seting Options
 There are two ways to set your options to run the code.
@@ -56,9 +60,19 @@ python main.py --webcam
 ```
 
 ## Demo Object Detection with Webcam
-Use the code below to demo the OD algorithm with your webcam read.
+Use the code below to demo the OD algorithm with your webcam input.
 ```
 python main.py --webcam --od
+```
+
+## Demo Pose Estimation with Webcam
+Use the code below to demo the PE body algorithm with your webcam input.
+```
+python main.py --webcam --pe
+```
+Use the code below to demo the PE body and hands algorithm with your webcam input.
+```
+python main.py --webcam --pe --pe_hand True
 ```
 
 # Main Contributors

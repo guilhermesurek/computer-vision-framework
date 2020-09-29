@@ -80,6 +80,34 @@ class Options():
                             default=0.6,
                             type=float,
                             help="Object Detection Model NSM Threshold.")
+        ### POSE ESTIMATION SECTION
+        parser.add_argument('--pe',
+                            action='store_true',
+                            help="Evaluate the Pose Estimation Algorithm.")
+        parser.add_argument('--pe_body',
+                            default=True,
+                            type=bool,
+                            help="Use body model in the evaluation of Pose Estimation Algorithm.")
+        parser.add_argument('--pe_body_draw',
+                            default=True,
+                            type=bool,
+                            help="Draw body points in the input image.")
+        parser.add_argument('--pe_hand',
+                            default=False,
+                            type=bool,
+                            help="Use hand model in the evaluation of Pose Estimation Algorithm.")
+        parser.add_argument('--pe_hand_draw',
+                            default=True,
+                            type=bool,
+                            help="Draw hand points in the input image.")
+        parser.add_argument('--pe_body_model_path',
+                            default=Path('models/pose/body_pose_model.pth'),
+                            type=Path,
+                            help="Pose Estimation's Body Model pretrained weights file path.")
+        parser.add_argument('--pe_hand_model_path',
+                            default=Path('models/pose/hand_pose_model.pth'),
+                            type=Path,
+                            help="Pose Estimation's Hand Model pretrained weights file path.")
 
         # Apply parser to the inputed arguments
         args = parser.parse_args()
@@ -130,6 +158,12 @@ class Options():
         if opt.od_class_names_path is not None:
             if not os.path.isabs(opt.od_class_names_path):
                 opt.od_class_names_path = opt.root_path / opt.od_class_names_path
+        if opt.pe_body_model_path is not None:
+            if not os.path.isabs(opt.pe_body_model_path):
+                opt.pe_body_model_path = opt.root_path / opt.pe_body_model_path
+        if opt.pe_hand_model_path is not None:
+            if not os.path.isabs(opt.pe_hand_model_path):
+                opt.pe_hand_model_path = opt.root_path / opt.pe_hand_model_path
         
         # return result opts
         return opt

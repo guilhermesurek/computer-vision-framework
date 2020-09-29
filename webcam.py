@@ -2,6 +2,7 @@
 import cv2
 import time
 from object_detection.object_detection import ObjDet
+from pose_estimation.pose_estimation import Pose
 
 class TimeMeter():
     ''' Handle time measurements. There are two modes available "time" and "fps".
@@ -93,6 +94,12 @@ def main_cam(opt):
         OD_obj = ObjDet(opt)
         # Initialize detection timing
         OD_meter = TimeMeter(topic='Object Detection', verbose=opt.verbose)
+    
+    if opt.pe:
+        # Instanciate the Pose Estimation Model
+        PE_obj = Pose(opt)
+        # Initialize detection timing
+        PE_meter = TimeMeter(topic='Pose Estimation', verbose=opt.verbose)
 
     # Main loop to flush webcam image
     while True:
@@ -103,12 +110,25 @@ def main_cam(opt):
 
         # OD Evaluate
         if opt.od:
+            # Start time count for OD
+            OD_meter.start()
             # Resize image
             img = cv2.resize(img, (opt.od_in_w, opt.od_in_h), interpolation=cv2.INTER_AREA)
             # Apply Detection
             OD_obj.do_detect(img)
             # Print boxes and labels in the image
             img = OD_obj.plot_boxes_cv2(img, OD_obj.boxes[0])
+            # Do counting for OD
+            OD_meter.count()
+        
+        # PE Evaluate
+        if opt.pe:
+            # Start time count for PE
+            PE_meter.start()
+            # Apply Detection
+            img = PE_obj.do_detect(img)
+            # Do counting for PE
+            PE_meter.count()
 
         # Calculate FPS
         fps_meter.count()
