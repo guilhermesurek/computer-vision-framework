@@ -7,6 +7,24 @@ def json_serial(obj):
     if isinstance(obj, Path):
         return str(obj)
 
+def get_mean_std(value_scale, dataset):
+    assert dataset in ['activitynet', 'kinetics', '0.5']
+
+    if dataset == 'activitynet':
+        mean = [0.4477, 0.4209, 0.3906]
+        std = [0.2767, 0.2695, 0.2714]
+    elif dataset == 'kinetics':
+        mean = [0.4345, 0.4051, 0.3775]
+        std = [0.2768, 0.2713, 0.2737]
+    elif dataset == '0.5':
+        mean = [0.5, 0.5, 0.5]
+        std = [0.5, 0.5, 0.5]
+
+    mean = [x * value_scale for x in mean]
+    std = [x * value_scale for x in std]
+
+    return mean, std
+
 class Options():
     ''' Class to handle all arguments and options manipulations.
     '''
@@ -48,6 +66,10 @@ class Options():
         parser.add_argument('--webcam',
                             action='store_true',
                             help='Run scripts with webcam.')
+        parser.add_argument('--webcam_calc_x_frames',
+                            default=16,
+                            type=int,
+                            help='Run models with webcam input every X frames.')
         ### OBJECT DETECTIION SECTION
         parser.add_argument('--od',
                             action='store_true',
@@ -107,15 +129,98 @@ class Options():
         parser.add_argument('--pe_body_model_path',
                             default=Path('models/pose/body_pose_model.pth'),
                             type=Path,
-                            help="Pose Estimation's Body Model pretrained weights file path.")
+                            help="Pose Estimation Body Model pretrained weights file path.")
         parser.add_argument('--pe_body_keys_path',
                             default=Path('models/pose/body_key_points.json'),
                             type=Path,
-                            help="Pose Estimation's Body keys meaning file path (json).")
+                            help="Pose Estimation Body keys meaning file path (json).")
         parser.add_argument('--pe_hand_model_path',
                             default=Path('models/pose/hand_pose_model.pth'),
                             type=Path,
-                            help="Pose Estimation's Hand Model pretrained weights file path.")
+                            help="Pose Estimation Hand Model pretrained weights file path.")
+        ### ACTIVITY RECOGNITION SECTION
+        parser.add_argument('--ar',
+                            action='store_true',
+                            help="Evaluate the Activity Recognition Algorithm.")
+        parser.add_argument('--ar_model_path',
+                            default=Path('models/act_rec/act_rec_model.pth'),
+                            type=Path,
+                            help="Activity Recognition: Model's file path.")
+        parser.add_argument('--ar_class_names_path',
+                            default=Path('models/act_rec/hmdb51.names'),
+                            type=Path,
+                            help="Activity Recognition: Model class names file path.")
+        parser.add_argument('--ar_model',
+                            default='resnet',
+                            type=str,
+                            help="Activity Recognition: Model's type. Default is resnet.")
+        parser.add_argument('--ar_model_depth',
+                            default=18,
+                            type=int,
+                            help="Activity Recognition: Model's depth. Default is 18.")
+        parser.add_argument('--ar_threshold',
+                            default=0.5,
+                            type=int,
+                            help="Activity Recognition: Model's threshold. Default is 0.5.")
+        parser.add_argument('--ar_n_classes',
+                            default=51,
+                            type=int,
+                            help="Activity Recognition: Model's number of classes. Default is 51 from HMDB51 dataset classes.")
+        parser.add_argument('--ar_n_input_channels',
+                            default=3,
+                            type=int,
+                            help="Activity Recognition: Model's number of input channels. Default RGB, 3 channels.")
+        parser.add_argument('--ar_resnet_shortcut',
+                            default='B',
+                            type=str,
+                            help='Activity Recognition: Shortcut type of resnet (A | B).')
+        parser.add_argument('--ar_conv1_t_size',
+                            default=7,
+                            type=int,
+                            help='Activity Recognition: Kernel size in t dim of conv1.')
+        parser.add_argument('--ar_conv1_t_stride',
+                            default=1,
+                            type=int,
+                            help='Activity Recognition: Stride in t dim of conv1.')                            
+        parser.add_argument('--ar_no_max_pool',
+                            action='store_true',
+                            help='Activity Recognition: If true, the max pooling after conv1 is removed.')
+        parser.add_argument('--ar_resnet_widen_factor',
+                            default=1.0,
+                            type=float,
+                            help='Activity Recognition: The number of feature maps of resnet is multiplied by this value.')
+        parser.add_argument('--ar_wide_resnet_k',
+                            default=2,
+                            type=int,
+                            help='Activity Recognition: Wide resnet k.')
+        parser.add_argument('--ar_resnext_cardinality',
+                            default=32,
+                            type=int,
+                            help='Activity Recognition: ResNeXt cardinality.')                                                 
+        parser.add_argument('--ar_mean_dataset',
+                            default='kinetics',
+                            type=str,
+                            help='Activity Recognition: Dataset for mean values of mean subtraction (activitynet | kinetics | 0.5).')
+        parser.add_argument('--ar_no_mean_norm',
+                            action='store_true',
+                            help='Activity Recognition: If true, inputs are not normalized by mean.')
+        parser.add_argument('--ar_no_std_norm',
+                            action='store_true',
+                            help='Activity Recognition: If true, inputs are not normalized by standard deviation.')
+        parser.add_argument('--ar_value_scale',
+                            default=1,
+                            type=int,
+                            help='Activity Recognition: If 1, range of inputs is [0-1]. If 255, range of inputs is [0-255].')
+        parser.add_argument('--ar_sample_size',
+                            default=112,
+                            type=int,
+                            help='Activity Recognition: Height and width of inputs.')
+        parser.add_argument('--ar_crop',
+                            default='center',
+                            type=str,
+                            help=('Activity Recognition: Cropping method in inference. (center | nocrop)'
+                                'When nocrop, fully convolutional inference is performed,'
+                                'and mini-batch consists of clips of one video.'))
 
         # Apply parser to the inputed arguments
         args = parser.parse_args()
@@ -172,7 +277,15 @@ class Options():
         if opt.pe_hand_model_path is not None:
             if not os.path.isabs(opt.pe_hand_model_path):
                 opt.pe_hand_model_path = opt.root_path / opt.pe_hand_model_path
+        if opt.ar_class_names_path is not None:
+            if not os.path.isabs(opt.ar_class_names_path):
+                opt.ar_class_names_path = opt.root_path / opt.ar_class_names_path
+        if opt.ar_model_path is not None:
+            if not os.path.isabs(opt.ar_model_path):
+                opt.ar_model_path = opt.root_path / opt.ar_model_path        
         
+        opt.ar_mean, opt.ar_std = get_mean_std(opt.ar_value_scale, dataset=opt.ar_mean_dataset)
+
         # return result opts
         return opt
     

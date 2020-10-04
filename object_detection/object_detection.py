@@ -31,7 +31,7 @@ class ObjDet():
             model = Yolov4(yolov4conv137weight=None, n_classes=self.opt.od_n_classes, inference=True)
         # Load pretrained model
         if self.weights_path is not None:
-            pretrained_dict = torch.load(self.weights_path, map_location=torch.device('cuda'))
+            pretrained_dict = torch.load(self.weights_path, map_location='cpu') #torch.device('cuda'))
             model.load_state_dict(pretrained_dict)
         # If cuda, move model to cuda
         if self.opt.cuda:

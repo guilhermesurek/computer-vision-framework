@@ -3,6 +3,7 @@ import cv2
 import time
 from object_detection.object_detection import ObjDet
 from pose_estimation.pose_estimation import Pose
+from activity_recognition.activity_recognition import ActRec
 
 class TimeMeter():
     ''' Handle time measurements. There are two modes available "time" and "fps".
@@ -101,6 +102,12 @@ def main_cam(opt):
         # Initialize detection timing
         PE_meter = TimeMeter(topic='Pose Estimation', verbose=opt.verbose)
 
+    if opt.ar:
+        # Instanciate the Pose Estimation Model
+        AR_obj = ActRec(opt)
+        # Initialize detection timing
+        AR_meter = TimeMeter(topic='Activity Recognition', verbose=opt.verbose)
+
     # Main loop to flush webcam image
     while True:
         # Read from webcam
@@ -108,27 +115,47 @@ def main_cam(opt):
         # Save frame in another variable to keep original frame
         img = frame
 
-        # OD Evaluate
-        if opt.od:
-            # Start time count for OD
-            OD_meter.start()
-            # Resize image
-            img = cv2.resize(img, (opt.od_in_w, opt.od_in_h), interpolation=cv2.INTER_AREA)
-            # Apply Detection
-            OD_obj.do_detect(img)
-            # Print boxes and labels in the image
-            img = OD_obj.plot_boxes_cv2(img, OD_obj.boxes[0])
-            # Do counting for OD
-            OD_meter.count()
-        
-        # PE Evaluate
-        if opt.pe:
-            # Start time count for PE
-            PE_meter.start()
-            # Apply Detection
-            img = PE_obj.do_detect(img)
-            # Do counting for PE
-            PE_meter.count()
+        # AR Evaluate
+        if opt.ar:
+            # Save img in batch, because activity recognition needs 16 consecutives frames to execute
+            AR_obj.save_in_clip(img)
+
+        # Evaluate Models every X frames
+        if fps_meter.acc_count % opt.webcam_calc_x_frames == 0:
+
+            # AR Evaluate
+            if opt.ar:
+                # Start time count for PE
+                AR_meter.start()
+                # Apply Detection
+                act_scr, act_cls = AR_obj.do_detect()
+                # Save class for flush in image
+                if act_cls:
+                    flush_var['action']=act_cls
+                # Do counting for PE
+                AR_meter.count()
+
+            # OD Evaluate
+            if opt.od:
+                # Start time count for OD
+                OD_meter.start()
+                # Resize image
+                img = cv2.resize(img, (opt.od_in_w, opt.od_in_h), interpolation=cv2.INTER_AREA)
+                # Apply Detection
+                OD_obj.do_detect(img)
+                # Print boxes and labels in the image
+                img = OD_obj.plot_boxes_cv2(img, OD_obj.boxes[0])
+                # Do counting for OD
+                OD_meter.count()
+            
+            # PE Evaluate
+            if opt.pe:
+                # Start time count for PE
+                PE_meter.start()
+                # Apply Detection
+                img = PE_obj.do_detect(img)
+                # Do counting for PE
+                PE_meter.count()
 
         # Calculate FPS
         fps_meter.count()
