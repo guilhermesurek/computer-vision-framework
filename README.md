@@ -75,6 +75,12 @@ Use the code below to demo the PE body and hands algorithm with your webcam inpu
 python main.py --webcam --pe --pe_hand True
 ```
 
+## Demo Action Recognition with Webcam
+Use the code below to demo the Action Recognition algorithm with your webcam input.
+```
+python main.py --webcam --ar
+```
+
 # Main Contributors
 - Guilherme Augusto Silva Surek
 - Mateus Isaac Di Domenico
