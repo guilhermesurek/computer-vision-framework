@@ -4,6 +4,7 @@ import time
 from object_detection.object_detection import ObjDet
 from pose_estimation.pose_estimation import Pose
 from activity_recognition.activity_recognition import ActRec
+from distance import get_shoulder_dist_from_pe
 
 class TimeMeter():
     ''' Handle time measurements. There are two modes available "time" and "fps".
@@ -61,19 +62,31 @@ def flush_var_in_frame(frame, flush_var):
     # Initialize positions
     x, y = [10, 10]
     # Define font size
-    font_size = 20
+    font_size = 25
     # Define x slide
     x_slide = 120
     # Loop over variables
     for key in flush_var:
-        # Calculate postion
-        y+=font_size
-        # Flush info on frame
-        frame = cv2.putText(frame, f"{key}: {flush_var[key]}", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 0, 0), 1)
-        # If got in the end of vertical axis
-        if (y + font_size >= h):
-            # slide in x axis
-            x+=x_slide
+        # Check if the key is a list or a value
+        if not isinstance(flush_var[key], list):
+            # Calculate postion
+            y+=font_size
+            # Flush info on frame
+            frame = cv2.putText(frame, f"{key}: {flush_var[key]}", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 0, 0), 1)
+            # If got in the end of vertical axis
+            if (y + font_size >= h):
+                # slide in x axis
+                x+=x_slide
+        else:
+            # Text with key point pre defined
+            value, x1, y1 = flush_var[key]
+            # Check points (x, y)
+            y1 = h if y1 > h else y1
+            x1 = w if x1 > w else x1
+            y1 = 0 if y1 < 0 else y1
+            x1 = 0 if x1 < 0 else x1
+            # Flush info on frame
+            frame = cv2.putText(frame, f"{key}: {value}", (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
     return frame
 
 def main_cam(opt):
@@ -113,7 +126,7 @@ def main_cam(opt):
         # Read from webcam
         _, frame = cap.read()
         # Save frame in another variable to keep original frame
-        img = frame
+        img = frame.copy()
 
         # AR Evaluate
         if opt.ar:
@@ -156,6 +169,10 @@ def main_cam(opt):
                 img = PE_obj.do_detect(img)
                 # Do counting for PE
                 PE_meter.count()
+                # Calculate shoulder distance
+                distances = get_shoulder_dist_from_pe(candidate=PE_obj.body_candidate, subset=PE_obj.body_subset)
+                for i in range(len(distances)):
+                    flush_var[f"p{i+1}"] = distances[i]
 
         # Calculate FPS
         fps_meter.count()
@@ -163,6 +180,13 @@ def main_cam(opt):
         
         # Flush variables in frame
         img = flush_var_in_frame(img, flush_var)
+        # Clean Flush Dict
+        flush_var = {"action": flush_var['action']} if 'action' in flush_var.keys() else {}
+
+        # Keep flushing OD result
+        if opt.od:
+            # Print boxes and labels in the image
+            img = OD_obj.plot_boxes_cv2(img, OD_obj.boxes[0])
 
         # Show frame with flushes
         cv2.imshow("Web cam input", img)

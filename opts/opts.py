@@ -147,7 +147,7 @@ class Options():
                             type=Path,
                             help="Activity Recognition: Model's file path.")
         parser.add_argument('--ar_class_names_path',
-                            default=Path('models/act_rec/hmdb51.names'),
+                            default=Path('models/act_rec/hmdb51_PT.names'),
                             type=Path,
                             help="Activity Recognition: Model class names file path.")
         parser.add_argument('--ar_model',

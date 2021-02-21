@@ -15,6 +15,8 @@ class Pose():
         self.body = self.get_body_model()
         self.hand = self.get_hand_model()
         self.body_keys_mean = self.get_body_keys()
+        self.body_candidate = None
+        self.body_subset = None
 
     def get_body_model(self):
         ''' Function to get the body model.
