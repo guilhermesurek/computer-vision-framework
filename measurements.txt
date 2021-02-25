@@ -1,0 +1,44 @@
+Height and width (cm)
+
+bicycle = 102, 170
+umbrella = 65, 106
+tie = 35.56, 7.62
+suitcase = 55, 40
+bottle = 22.65, 6
+wine glass = 16, 6
+cup = 6.5, 9.7
+
+fork = 16.5, 2.5
+knife = 16.5, 2
+spoon = 16.5, 4
+
+banana = 18, 5
+apple = 8, 7
+sandwich = 13, 9
+orange = 8, 8
+carrot =  15, 3
+hot dog = 8.5, 18
+pizza = 46, 46
+
+chair = 140, 62
+
+tvmonitor = 40, 71
+laptop = 23, 36.5
+mouse = 11.8 ,6.6
+remote = 17, 4.3
+keyboard = 16 ,43
+cell phone = 15, 7.5
+
+refrigerator = 178, 89
+book = 15, 10.5
+clock = 18, 18
+vase = 26.6, 9.5
+scissors = 18, 8
+
+hair drier = 28, 28
+toothbrush = 17, 2.2
+
+
+
+
+

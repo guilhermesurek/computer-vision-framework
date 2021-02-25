@@ -1,10 +1,14 @@
 # object_detection.py
+import ipdb
 from object_detection.od_model import Yolov4
+from distance import ObjDistance
+
 import time
 import numpy as np
 import torch
 import cv2
 import math
+
 
 class ObjectDetectionError(Exception):
     pass
@@ -54,6 +58,8 @@ class ObjDet():
         return class_names
 
     def do_detect(self, img, conf_thresh=None, nms_thresh=None):
+        # Initialize detect
+        self.distances = []
         # Set model to eval mode
         self.model.eval()
         # Start counting time
@@ -135,10 +141,11 @@ class ObjDet():
                 blue = get_color(0, offset, classes)
                 if color is None:
                     rgb = (red, green, blue)
-                img = cv2.putText(img, class_names[cls_id], (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 1.2, rgb, 1)
-                # Distance
-                #dist=47*484.04/(abs(x1-x2))
-                #print(f"distance: {dist:0.3f}")
+                # Calculate Distance
+                obj = ObjDistance(obj_type='object', label=class_names[cls_id], pos=[x1, y1, x2, y2])
+                self.distances.append(obj)
+                img = cv2.putText(img, class_names[cls_id] + " - " + str(obj.dist), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 1.0, rgb, 1)
+                img = cv2.circle(img, (obj.centerx, obj.centery), 1, rgb) # comentar
             img = cv2.rectangle(img, (x1, y1), (x2, y2), rgb, 1)
         if savename:
             print("save plot results to %s" % savename)

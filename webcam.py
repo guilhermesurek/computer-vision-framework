@@ -1,10 +1,12 @@
 # webcam.py
 import cv2
 import time
+
+import ipdb
 from object_detection.object_detection import ObjDet
 from pose_estimation.pose_estimation import Pose
 from activity_recognition.activity_recognition import ActRec
-from distance import get_shoulder_dist_from_pe
+from distance import get_shoulder_dist_from_pe, get_obj_obj_dist
 
 class TimeMeter():
     ''' Handle time measurements. There are two modes available "time" and "fps".
@@ -79,7 +81,7 @@ def flush_var_in_frame(frame, flush_var):
                 x+=x_slide
         else:
             # Text with key point pre defined
-            value, x1, y1 = flush_var[key]
+            value, x1, y1, cx, cy = flush_var[key]
             # Check points (x, y)
             y1 = h if y1 > h else y1
             x1 = w if x1 > w else x1
@@ -87,6 +89,7 @@ def flush_var_in_frame(frame, flush_var):
             x1 = 0 if x1 < 0 else x1
             # Flush info on frame
             frame = cv2.putText(frame, f"{key}: {value}", (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 255), 1)
+            frame = cv2.circle(frame, (cx, cy), 1, (0, 255, 255)) # comment
     return frame
 
 def main_cam(opt):
@@ -173,6 +176,20 @@ def main_cam(opt):
                 distances = get_shoulder_dist_from_pe(candidate=PE_obj.body_candidate, subset=PE_obj.body_subset)
                 for i in range(len(distances)):
                     flush_var[f"p{i+1}"] = distances[i]
+
+        #import ipdb; ipdb.set_trace()
+        if opt.pe and opt.od:
+            i=0
+            for objectd in OD_obj.distances:
+                if len(distances)>0 and objectd.label == 'cup':
+                    flush_var[f"p_obj{i+1}"] = get_obj_obj_dist(obj1_pos=[distances[0][3], distances[0][4]],
+                                                obj2_pos=[objectd.centerx, objectd.centery],
+                                                img_pos=[int(img.shape[1]/2), int(img.shape[0]/2)],
+                                                obj1_dist=distances[0][0],
+                                                obj2_dist=objectd.dist,
+                                                factor=objectd.factor)
+                    i+=1
+
 
         # Calculate FPS
         fps_meter.count()
